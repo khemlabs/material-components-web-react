@@ -1,14 +1,37 @@
-module.exports = [
-  ...require('./button/webpack.config.js'),
-  ...require('./card/webpack.config.js'),
-  ...require('./chips/webpack.config.js'),
-  ...require('./fab/webpack.config.js'),
-  ...require('./floating-label/webpack.config.js'),
-  ...require('./line-ripple/webpack.config.js'),
-  ...require('./material-icon/webpack.config.js'),
-  ...require('./notched-outline/webpack.config.js'),
-  ...require('./text-field/webpack.config.js'),
-  ...require('./text-field/helper-text/webpack.config.js'),
-  ...require('./text-field/icon/webpack.config.js'),
-  ...require('./top-app-bar/webpack.config.js'),
-];
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
+
+const {importer} = require('../../packages/webpack.util');
+const outputPath = 'app';
+
+module.exports = function() {
+  return {
+    entry: ['babel-polyfill', `./test/screenshot/index.js`],
+    output: {
+      filename: outputPath + '.js',
+    },
+    module: {
+      rules: [{
+        test: /\.js$/,
+        loader: 'babel-loader',
+        query: {compact: true},
+      }, {
+        test: /\.scss$/,
+        use: ExtractTextPlugin.extract({
+          use: [
+            {
+              loader: 'css-loader',
+            }, {
+              loader: 'sass-loader',
+              options: {importer},
+            },
+          ],
+        }),
+      }],
+    },
+    plugins: [
+      new ExtractTextPlugin(outputPath + '.css'),
+      new OptimizeCssAssetsPlugin(),
+    ],
+  };
+};
